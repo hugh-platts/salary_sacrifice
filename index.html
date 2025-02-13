@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Sacrifice Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Salary Sacrifice Calculator</h1>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <label for="grossSalary">Gross Salary (£):</label>
+                <input type="number" id="grossSalary" step="100">
+            </div>
+            
+            <div class="input-group">
+                <label for="vehicleCost">Monthly Vehicle Cost (£):</label>
+                <input type="number" id="vehicleCost" step="10">
+            </div>
+            
+            <div class="input-group">
+                <label for="employerNIC">Employer NIC (%):</label>
+                <input type="number" id="employerNIC" step="0.1" value="13.8">
+            </div>
+            
+            <div class="input-group">
+                <label for="taxRate">Income Tax Rate (%):</label>
+                <input type="number" id="taxRate" step="1" value="20">
+            </div>
+            
+            <div class="input-group">
+                <label for="employeeNIC">Employee NIC (%):</label>
+                <input type="number" id="employeeNIC" step="0.1" value="12">
+            </div>
+            
+            <div class="input-group">
+                <label for="duration">Lease Duration (months):</label>
+                <input type="number" id="duration" step="1" value="12">
+            </div>
+            
+            <div class="input-group">
+                <label for="additionalCosts">Additional Monthly Costs (£):</label>
+                <input type="number" id="additionalCosts" step="10" value="0">
+            </div>
+        </div>
+
+        <button onclick="calculate()">Calculate</button>
+
+        <div class="results-section">
+            <h2>Results</h2>
+            <div class="result-item">
+                <span>Total Monthly Sacrifice:</span>
+                <span>£<span id="totalSacrificeMonthly">0</span></span>
+                <span>(£<span id="totalSacrificeTotal">0</span> total)</span>
+            </div>
+            
+            <div class="result-item">
+                <span>Tax Savings:</span>
+                <span>£<span id="taxSavingsMonthly">0</span></span>
+                <span>(£<span id="taxSavingsTotal">0</span> total)</span>
+            </div>
+            
+            <div class="result-item">
+                <span>NIC Savings:</span>
+                <span>£<span id="nicSavingsMonthly">0</span></span>
+                <span>(£<span id="nicSavingsTotal">0</span> total)</span>
+            </div>
+            
+            <div class="result-item">
+                <span>Reduced Gross Salary:</span>
+                <span>£<span id="reducedGross">0</span></span>
+            </div>
+            
+            <div class="result-item highlight">
+                <span>Net Salary After Sacrifice:</span>
+                <span>£<span id="netSalary">0</span></span>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
