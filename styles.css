@@ -89,3 +89,44 @@ button:hover {
         flex-direction: column;
     }
 }
+/* Breakdown styles */
+details {
+    margin: 15px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+summary {
+    cursor: pointer;
+    font-weight: bold;
+    color: #666;
+    outline: none;
+}
+
+.breakdown-items {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    margin: 8px 0;
+    padding: 6px;
+    border-radius: 4px;
+}
+
+.deduction span:last-child {
+    color: #dc3545;
+}
+
+.saving span:last-child {
+    color: #28a745;
+}
+
+.final {
+    background-color: #e8f4ea;
+    font-weight: bold;
+}
