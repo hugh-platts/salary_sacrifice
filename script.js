@@ -1,4 +1,4 @@
-// Tax Configuration
+// --- Tax Band Setup ---
 let currentTaxRate = 20;
 let currentTaxBand = 'Basic rate';
 const TAX_BANDS = {
@@ -19,7 +19,7 @@ const TAX_BANDS = {
   ]
 };
 
-// Update tax rate based on region and gross salary
+// Update tax rate based on gross salary and region (for initial guidance)
 function calculateTaxRate() {
   const gross = parseFloat(document.getElementById('grossSalary').value) || 0;
   const region = document.getElementById('taxRegion').value;
@@ -29,19 +29,18 @@ function calculateTaxRate() {
   currentTaxRate = band.rate;
   currentTaxBand = band.name;
   
-  // Update the tax rate input and band display
   document.getElementById('taxRateInput').value = currentTaxRate;
   document.getElementById('taxBandDisplay').textContent = `(${currentTaxBand})`;
 }
 
-// Event listeners for button groups
+// --- Button Group Event Listeners ---
 document.querySelectorAll('.btn-group .btn').forEach(btn => {
   btn.addEventListener('click', function () {
     const parent = this.parentNode;
     Array.from(parent.children).forEach(child => child.classList.remove('active'));
     this.classList.add('active');
     
-    // Toggle NI Percentage input visibility if "Percent" is selected
+    // Toggle NI Percentage input if "Percent" is selected
     if (parent.id === 'niGroup' && this.textContent.trim() === 'Percent') {
       document.getElementById('niPercent').classList.remove('hidden');
     } else if (parent.id === 'niGroup') {
@@ -50,23 +49,23 @@ document.querySelectorAll('.btn-group .btn').forEach(btn => {
     
     // Toggle Insurance input visibility
     if (parent.id === 'insuranceToggle') {
-      const insuranceInput = document.getElementById('insuranceMonthly');
+      const insInput = document.getElementById('insuranceMonthly');
       if (this.textContent.trim() === 'Yes') {
-        insuranceInput.classList.remove('hidden');
+        insInput.classList.remove('hidden');
       } else {
-        insuranceInput.classList.add('hidden');
-        insuranceInput.value = '';
+        insInput.classList.add('hidden');
+        insInput.value = '';
       }
     }
     
     // Toggle Maintenance input visibility
     if (parent.id === 'maintenanceToggle') {
-      const maintenanceInput = document.getElementById('maintenanceMonthly');
+      const mainInput = document.getElementById('maintenanceMonthly');
       if (this.textContent.trim() === 'Yes') {
-        maintenanceInput.classList.remove('hidden');
+        mainInput.classList.remove('hidden');
       } else {
-        maintenanceInput.classList.add('hidden');
-        maintenanceInput.value = '';
+        mainInput.classList.add('hidden');
+        mainInput.value = '';
       }
     }
     
@@ -81,100 +80,77 @@ document.querySelectorAll('.btn-group .btn').forEach(btn => {
   });
 });
 
-// Main Calculation Function
+// --- Main Calculation ---
 function calculate() {
-  // Retrieve input values
-  const grossSalary = parseFloat(document.getElementById('grossSalary').value) || 0; // Annual
-  const vehicleCost = parseFloat(document.getElementById('vehicleCost').value) || 0; // Monthly
-  const employerNIC = parseFloat(document.getElementById('employerNIC').value) / 100 || 0;
+  // Retrieve inputs
+  const grossSalaryAnnual = parseFloat(document.getElementById('grossSalary').value) || 0;
+  const vehicleCost = parseFloat(document.getElementById('vehicleCost').value) || 0; // Monthly Finance Rental
+  const employerNICPercent = parseFloat(document.getElementById('employerNIC').value) || 0;
+  const employeeNICPercent = (parseFloat(document.getElementById('employeeNIC').value) || 2);
+  const bikRatePercent = (parseFloat(document.getElementById('bikRate').value) || 2);
+  const taxRateDecimal = (parseFloat(document.getElementById('taxRateInput').value) || currentTaxRate) / 100;
   
-  // Use tax rate from input (allowing manual override)
-  const taxRate = parseFloat(document.getElementById('taxRateInput').value) / 100 || (currentTaxRate / 100);
+  // Optional inputs
+  const maintenanceMonthly = parseFloat(document.getElementById('maintenanceMonthly').value) || 0;
+  const insuranceMonthly = parseFloat(document.getElementById('insuranceMonthly').value) || 0;
   
-  // Employee NIC (%) from input
-  const employeeNIC = (parseFloat(document.getElementById('employeeNIC').value) || 2) / 100;
-  
-  // BIK Rate (%) from input
-  const bikRate = (parseFloat(document.getElementById('bikRate').value) || 2) / 100;
-  
-  // Compute monthly BIK amount based on vehicle cost
-  const bikMonthly = vehicleCost * bikRate;
-  
-  // Determine lease duration (in months)
-  let duration = 36;
-  const activeDurationBtn = document.querySelector('#leaseDurationGroup .btn.active');
-  if (activeDurationBtn?.dataset.months) {
-    duration = parseInt(activeDurationBtn.dataset.months);
-  } else if (document.getElementById('customDuration').value) {
-    duration = parseInt(document.getElementById('customDuration').value);
-  }
-  
-  // Documentation and Registration fees (editable)
+  // One-Time Fees
   const docFee = parseFloat(document.getElementById('docFee').value) || 0;
   const regFee = parseFloat(document.getElementById('regFee').value) || 0;
-  
-  // Calculate one-time fees (not spread over 12 months)
   const feesTotal = docFee + regFee;
   
-  // Insurance: monthly input if included
-  const includeInsurance = document.querySelector('#insuranceToggle .btn.active').textContent.trim() === 'Yes';
-  const insuranceMonthly = includeInsurance ? (parseFloat(document.getElementById('insuranceMonthly').value) || 0) : 0;
-  
-  // Maintenance: monthly input if included
-  const includeMaintenance = document.querySelector('#maintenanceToggle .btn.active').textContent.trim() === 'Yes';
-  const maintenanceMonthly = includeMaintenance ? (parseFloat(document.getElementById('maintenanceMonthly').value) || 0) : 0;
-  
-  // Base monthly sacrifice calculation:
-  // vehicle cost + (docFee+regFee spread over 12) + insurance + maintenance
-  let totalMonthlyCost = vehicleCost + ((docFee + regFee) / 12) + insuranceMonthly + maintenanceMonthly;
-  
-  // Early Termination Insurance adjustment
-  const terminationInsurance = parseFloat(document.getElementById('terminationInsurance').value) / 100 || 0;
-  totalMonthlyCost += totalMonthlyCost * terminationInsurance;
-  
-  // NI Adjustment based on selected option
-  const niOption = document.querySelector('#niGroup .btn.active').textContent.trim();
-  let niAdjustment = 0;
-  if (niOption === 'Percent') {
-    const niPercent = parseFloat(document.getElementById('niPercent').value) / 100 || 0;
-    niAdjustment = totalMonthlyCost * niPercent;
-  } else if (niOption === 'No') {
-    niAdjustment = 0;
-  } else {
-    // Default: "Yes"
-    niAdjustment = 0;
+  // Lease duration (months) – for informational purposes
+  let leaseDuration = 36;
+  const activeLeaseBtn = document.querySelector('#leaseDurationGroup .btn.active');
+  if (activeLeaseBtn?.dataset.months) {
+    leaseDuration = parseInt(activeLeaseBtn.dataset.months);
+  } else if (document.getElementById('customDuration').value) {
+    leaseDuration = parseInt(document.getElementById('customDuration').value);
   }
-  totalMonthlyCost -= niAdjustment;
   
-  // ---------------------------
-  // Breakdown Calculations (Annual & Monthly)
-  // ---------------------------
-  const monthlySalarySacrifice = totalMonthlyCost; // Already monthly
-  const annualSalarySacrifice = monthlySalarySacrifice * 12;
+  // --- Benefit Components (Monthly) ---
+  const financeRental = vehicleCost; // Finance Rental
+  const maintenanceRental = maintenanceMonthly; // Maintenance Rental
+  const nrVAT = financeRental * 0.10; // 10% of Finance Rental
+  const financeRentalTotal = financeRental + maintenanceRental + nrVAT; // Finance Rental Total
+  const insuranceRate = insuranceMonthly; // Insurance Rate
+  const employerGrossRental = financeRentalTotal + insuranceRate; // Employer Gross Rental
   
-  // Reduced Gross Salary (Annual) = Annual Gross - Annual Sacrifice + (BIK monthly * 12)
-  const reducedGrossAnnual = grossSalary - annualSalarySacrifice + (bikMonthly * 12);
-  const monthlyReducedGross = reducedGrossAnnual / 12;
+  // --- Employer NIC Calculation ---
+  const niOption = document.querySelector('#niGroup .btn.active').textContent.trim();
+  let appliedEmployerNISavings = 0;
+  if (niOption === "Yes") {
+    appliedEmployerNISavings = employerGrossRental * (employerNICPercent / 100);
+  } else if (niOption === "Percent") {
+    const percentValue = parseFloat(document.getElementById('niPercent').value) || 0;
+    appliedEmployerNISavings = employerGrossRental * (percentValue / 100);
+  } else { // "No"
+    appliedEmployerNISavings = 0;
+  }
+  const employerNI = employerGrossRental * 0.01123; // Employer NI cost
   
-  // Tax Calculations (Annual)
-  const originalTaxAnnual = grossSalary * taxRate;
-  const newTaxAnnual = reducedGrossAnnual * taxRate;
-  const taxSavingsAnnual = originalTaxAnnual - newTaxAnnual;
-  const monthlyTaxSavings = taxSavingsAnnual / 12;
+  // --- Gross Salary Sacrifice ---
+  const grossSalarySacrifice = employerGrossRental - appliedEmployerNISavings + employerNI;
   
-  // NIC Calculations (Annual)
-  const originalNICAnnual = grossSalary * employeeNIC;
-  const newNICAnnual = reducedGrossAnnual * employeeNIC;
-  const nicSavingsAnnual = originalNICAnnual - newNICAnnual;
-  const monthlyNicSavings = nicSavingsAnnual / 12;
+  // --- Tax & NIC Savings ---
+  const taxSaving = grossSalarySacrifice * taxRateDecimal;
+  const niSaving = grossSalarySacrifice * (employeeNICPercent / 100);
   
-  // Net Salary (Annual)
-  const netSalaryAnnual = reducedGrossAnnual - newTaxAnnual - newNICAnnual;
-  const monthlyNetSalary = netSalaryAnnual / 12;
+  // --- BIK Tax ---
+  // Monthly BIK Tax = Finance Rental Total * (BIK Rate × 2)
+  const bikTax = financeRentalTotal * ((bikRatePercent / 100) * 2);
   
-  // ---------------------------
-  // Update Main Results
-  // ---------------------------
+  // --- Total Saving & Net Salary Sacrifice ---
+  const totalSaving = taxSaving + niSaving - bikTax;
+  const netSalarySacrifice = grossSalarySacrifice - totalSaving;
+  
+  // --- Cost Without Salary Sacrifice ---
+  const costWithoutSacrifice = employerGrossRental;
+  
+  // --- Annual Equivalents ---
+  const multiplier = 12;
+  
+  // --- Update Main Results ---
   const formatter = new Intl.NumberFormat('en-GB', {
     style: 'decimal',
     minimumFractionDigits: 2,
@@ -185,52 +161,64 @@ function calculate() {
     document.getElementById(id).textContent = formatter.format(value);
   };
   
-  updateElement('totalSacrificeMonthly', monthlySalarySacrifice);
-  updateElement('totalSacrificeTotal', annualSalarySacrifice);
-  updateElement('taxSavingsMonthly', monthlyTaxSavings);
-  updateElement('taxSavingsTotal', taxSavingsAnnual);
-  updateElement('nicSavingsMonthly', monthlyNicSavings);
-  updateElement('nicSavingsTotal', nicSavingsAnnual);
-  updateElement('reducedGross', monthlyReducedGross);
-  updateElement('reducedGrossAnnual', reducedGrossAnnual);
-  updateElement('netSalary', monthlyNetSalary);
-  updateElement('netSalaryAnnual', netSalaryAnnual);
+  updateElement('grossSacrificeMonthly', grossSalarySacrifice);
+  updateElement('grossSacrificeAnnual', grossSalarySacrifice * multiplier);
+  
+  updateElement('taxSavingMonthly', taxSaving);
+  updateElement('taxSavingAnnual', taxSaving * multiplier);
+  
+  updateElement('niSavingMonthly', niSaving);
+  updateElement('niSavingAnnual', niSaving * multiplier);
+  
+  updateElement('bikTaxMonthly', bikTax);
+  updateElement('bikTaxAnnual', bikTax * multiplier);
+  
+  updateElement('totalSavingMonthly', totalSaving);
+  updateElement('totalSavingAnnual', totalSaving * multiplier);
+  
+  updateElement('netSacrificeMonthly', netSalarySacrifice);
+  updateElement('netSacrificeAnnual', netSalarySacrifice * multiplier);
+  
+  updateElement('costWithoutSacrificeMonthly', costWithoutSacrifice);
+  updateElement('costWithoutSacrificeAnnual', costWithoutSacrifice * multiplier);
+  
   updateElement('feesTotal', feesTotal);
   
-  // ---------------------------
-  // Update Breakdown Section
-  // ---------------------------
-  // Original Gross Salary
-  updateElement('breakdownOriginalMonthly', grossSalary / 12);
-  updateElement('breakdownOriginalAnnual', grossSalary);
+  // --- Update Breakdown Section ---
+  updateElement('breakdownFinanceRental', financeRental);
+  updateElement('breakdownMaintenanceRental', maintenanceRental);
+  updateElement('breakdownNRVAT', nrVAT);
+  updateElement('breakdownFRTotal', financeRentalTotal);
+  updateElement('breakdownInsurance', insuranceRate);
+  updateElement('breakdownEGR', employerGrossRental);
+  updateElement('breakdownEmployerNISavings', appliedEmployerNISavings);
+  updateElement('breakdownEmployerNI', employerNI);
+  updateElement('breakdownGSS', grossSalarySacrifice);
+  updateElement('breakdownTaxSaving', taxSaving);
+  updateElement('breakdownNISaving', niSaving);
+  updateElement('breakdownBIKTax', bikTax);
+  updateElement('breakdownTotalSaving', totalSaving);
+  updateElement('breakdownNetSacrifice', netSalarySacrifice);
+  updateElement('breakdownCostWithout', costWithoutSacrifice);
   
-  // Salary Sacrifice
-  updateElement('breakdownSacrificeMonthly', monthlySalarySacrifice);
-  updateElement('breakdownSacrificeAnnual', annualSalarySacrifice);
+  // Update rates in breakdown display
+  updateElement('breakdownTaxRate', taxRateDecimal * 100);
+  updateElement('breakdownNIRate', employeeNICPercent);
+  updateElement('breakdownBIKRate', bikRatePercent);
   
-  // Reduced Gross Salary
-  updateElement('breakdownReducedMonthly', monthlyReducedGross);
-  updateElement('breakdownReducedAnnual', reducedGrossAnnual);
-  
-  // Tax Deduction
-  updateElement('breakdownOriginalTaxMonthly', originalTaxAnnual / 12);
-  updateElement('breakdownOriginalTaxAnnual', originalTaxAnnual);
-  
-  // Tax Savings
-  updateElement('breakdownTaxSavingMonthly', monthlyTaxSavings);
-  updateElement('breakdownTaxSavingAnnual', taxSavingsAnnual);
-  
-  // NIC Deduction
-  updateElement('breakdownOriginalNICMonthly', originalNICAnnual / 12);
-  updateElement('breakdownOriginalNICAnnual', originalNICAnnual);
-  
-  // NIC Savings
-  updateElement('breakdownNicSavingMonthly', monthlyNicSavings);
-  updateElement('breakdownNicSavingAnnual', nicSavingsAnnual);
-  
-  // Net Salary Calculation
-  updateElement('breakdownNetCalcMonthly', monthlyNetSalary);
-  updateElement('breakdownNetCalcAnnual', netSalaryAnnual);
+  // --- Update Employer NI Savings Passed Breakdown (Conditional) ---
+  if (niOption === "Yes") {
+    updateElement('breakdownEmployerNIPassedPercent', 100);
+    updateElement('breakdownEmployerNIPassed', appliedEmployerNISavings);
+    document.getElementById('breakdownEmployerNIPassedRow').classList.remove('hidden');
+  } else if (niOption === "Percent") {
+    const percentValue = parseFloat(document.getElementById('niPercent').value) || 0;
+    updateElement('breakdownEmployerNIPassedPercent', percentValue);
+    updateElement('breakdownEmployerNIPassed', appliedEmployerNISavings);
+    document.getElementById('breakdownEmployerNIPassedRow').classList.remove('hidden');
+  } else {
+    document.getElementById('breakdownEmployerNIPassedRow').classList.add('hidden');
+  }
 }
 
 // Run initial calculations
