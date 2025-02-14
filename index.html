@@ -17,7 +17,7 @@
       </div>
       
       <div class="input-group">
-        <label for="vehicleCost">Monthly Vehicle Cost (£):</label>
+        <label for="vehicleCost">Monthly Finance Rental (£):</label>
         <input type="number" id="vehicleCost" step="10" />
       </div>
       
@@ -125,35 +125,40 @@
     <div class="results-section">
       <h2>Results</h2>
       <div class="result-item">
-        <span>Total Monthly Sacrifice:</span>
-        <span>£<span id="totalSacrificeMonthly">0</span></span>
-        <span>(Annual: £<span id="totalSacrificeTotal">0</span>)</span>
+        <span>Gross Salary Sacrifice:</span>
+        <span>Monthly: £<span id="grossSacrificeMonthly">0</span></span>
+        <span>(Annual: £<span id="grossSacrificeAnnual">0</span>)</span>
       </div>
-      
       <div class="result-item">
-        <span>Tax Savings:</span>
-        <span>Monthly: £<span id="taxSavingsMonthly">0</span></span>
-        <span>(Annual: £<span id="taxSavingsTotal">0</span>)</span>
+        <span>Tax Saving:</span>
+        <span>Monthly: £<span id="taxSavingMonthly">0</span></span>
+        <span>(Annual: £<span id="taxSavingAnnual">0</span>)</span>
       </div>
-      
       <div class="result-item">
-        <span>NIC Savings:</span>
-        <span>Monthly: £<span id="nicSavingsMonthly">0</span></span>
-        <span>(Annual: £<span id="nicSavingsTotal">0</span>)</span>
+        <span>NI Saving:</span>
+        <span>Monthly: £<span id="niSavingMonthly">0</span></span>
+        <span>(Annual: £<span id="niSavingAnnual">0</span>)</span>
       </div>
-      
       <div class="result-item">
-        <span>Reduced Gross Salary:</span>
-        <span>Monthly: £<span id="reducedGross">0</span></span>
-        <span>(Annual: £<span id="reducedGrossAnnual">0</span>)</span>
+        <span>BIK Tax:</span>
+        <span>Monthly: £<span id="bikTaxMonthly">0</span></span>
+        <span>(Annual: £<span id="bikTaxAnnual">0</span>)</span>
       </div>
-      
+      <div class="result-item">
+        <span>Total Saving:</span>
+        <span>Monthly: £<span id="totalSavingMonthly">0</span></span>
+        <span>(Annual: £<span id="totalSavingAnnual">0</span>)</span>
+      </div>
       <div class="result-item highlight">
-        <span>Net Salary After Sacrifice:</span>
-        <span>Monthly: £<span id="netSalary">0</span></span>
-        <span>(Annual: £<span id="netSalaryAnnual">0</span>)</span>
+        <span>Net Salary Sacrifice:</span>
+        <span>Monthly: £<span id="netSacrificeMonthly">0</span></span>
+        <span>(Annual: £<span id="netSacrificeAnnual">0</span>)</span>
       </div>
-      
+      <div class="result-item">
+        <span>Cost Without Salary Sacrifice:</span>
+        <span>Monthly: £<span id="costWithoutSacrificeMonthly">0</span></span>
+        <span>(Annual: £<span id="costWithoutSacrificeAnnual">0</span>)</span>
+      </div>
       <div class="result-item">
         <span>One-Time Fees:</span>
         <span>£<span id="feesTotal">0</span></span>
@@ -164,48 +169,74 @@
           <summary>Show Calculation Breakdown</summary>
           <div class="breakdown-items">
             <div class="breakdown-item">
-              <span>Original Gross Salary:</span>
-              <span>Monthly: £<span id="breakdownOriginalMonthly">0</span></span>
-              <span>Annual: £<span id="breakdownOriginalAnnual">0</span></span>
-            </div>
-            <div class="breakdown-item deduction">
-              <span>Salary Sacrifice:</span>
-              <span>Monthly: -£<span id="breakdownSacrificeMonthly">0</span></span>
-              <span>Annual: -£<span id="breakdownSacrificeAnnual">0</span></span>
+              <span>Finance Rental:</span>
+              <span>£<span id="breakdownFinanceRental">0</span></span>
             </div>
             <div class="breakdown-item">
-              <span>Reduced Gross Salary:</span>
-              <span>Monthly: £<span id="breakdownReducedMonthly">0</span></span>
-              <span>Annual: £<span id="breakdownReducedAnnual">0</span></span>
+              <span>Maintenance Rental:</span>
+              <span>£<span id="breakdownMaintenanceRental">0</span></span>
             </div>
-            <div class="breakdown-item deduction">
-              <span>Original Tax Deduction:</span>
-              <span>Monthly: -£<span id="breakdownOriginalTaxMonthly">0</span></span>
-              <span>Annual: -£<span id="breakdownOriginalTaxAnnual">0</span></span>
+            <div class="breakdown-item">
+              <span>NR VAT (10% of Finance Rental):</span>
+              <span>£<span id="breakdownNRVAT">0</span></span>
             </div>
-            <div class="breakdown-item saving">
-              <span>Tax Savings:</span>
-              <span>Monthly: +£<span id="breakdownTaxSavingMonthly">0</span></span>
-              <span>Annual: +£<span id="breakdownTaxSavingAnnual">0</span></span>
+            <div class="breakdown-item">
+              <span>Finance Rental Total:</span>
+              <span>£<span id="breakdownFRTotal">0</span></span>
             </div>
-            <div class="breakdown-item deduction">
-              <span>Original NIC Deduction:</span>
-              <span>Monthly: -£<span id="breakdownOriginalNICMonthly">0</span></span>
-              <span>Annual: -£<span id="breakdownOriginalNICAnnual">0</span></span>
+            <div class="breakdown-item">
+              <span>Insurance Rate:</span>
+              <span>£<span id="breakdownInsurance">0</span></span>
             </div>
-            <div class="breakdown-item saving">
-              <span>NIC Savings:</span>
-              <span>Monthly: +£<span id="breakdownNicSavingMonthly">0</span></span>
-              <span>Annual: +£<span id="breakdownNicSavingAnnual">0</span></span>
+            <div class="breakdown-item">
+              <span>Employer Gross Rental:</span>
+              <span>£<span id="breakdownEGR">0</span></span>
+            </div>
+            <div class="breakdown-item">
+              <span>Employer NI Savings:</span>
+              <span>£<span id="breakdownEmployerNISavings">0</span></span>
+            </div>
+            <!-- New Breakdown Row for NI Savings Passed -->
+            <div class="breakdown-item hidden" id="breakdownEmployerNIPassedRow">
+              <span>Employer NI Savings Passed (%):</span>
+              <span><span id="breakdownEmployerNIPassedPercent">0</span>% | £<span id="breakdownEmployerNIPassed">0</span></span>
+            </div>
+            <div class="breakdown-item">
+              <span>Employer NI:</span>
+              <span>£<span id="breakdownEmployerNI">0</span></span>
+            </div>
+            <div class="breakdown-item">
+              <span>Gross Salary Sacrifice:</span>
+              <span>£<span id="breakdownGSS">0</span></span>
+            </div>
+            <div class="breakdown-item">
+              <span>Tax Saving (@<span id="breakdownTaxRate">0</span>%):</span>
+              <span>£<span id="breakdownTaxSaving">0</span></span>
+            </div>
+            <div class="breakdown-item">
+              <span>NI Saving (@<span id="breakdownNIRate">0</span>%):</span>
+              <span>£<span id="breakdownNISaving">0</span></span>
+            </div>
+            <div class="breakdown-item">
+              <span>BIK Rate (@<span id="breakdownBIKRate">0</span>%):</span>
+              <span>£<span id="breakdownBIKTax">0</span></span>
+            </div>
+            <div class="breakdown-item">
+              <span>Total Saving:</span>
+              <span>£<span id="breakdownTotalSaving">0</span></span>
             </div>
             <div class="breakdown-item final">
-              <span>Net Salary Calculation:</span>
-              <span>Monthly: £<span id="breakdownNetCalcMonthly">0</span></span>
-              <span>Annual: £<span id="breakdownNetCalcAnnual">0</span></span>
+              <span>Net Salary Sacrifice:</span>
+              <span>£<span id="breakdownNetSacrifice">0</span></span>
+            </div>
+            <div class="breakdown-item">
+              <span>Cost Without Salary Sacrifice:</span>
+              <span>£<span id="breakdownCostWithout">0</span></span>
             </div>
           </div>
         </details>
       </div>
+      
     </div>
     
   </div>
