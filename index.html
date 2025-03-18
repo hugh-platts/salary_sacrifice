@@ -78,7 +78,7 @@
       </div>
       
       <div class="input-group">
-        <label>Employer Keeps NI Savings?</label>
+        <label>Employer Passes on NI Savings?</label>
         <div class="btn-group" id="niGroup">
           <button class="btn active">Yes</button>
           <button class="btn">No</button>
@@ -214,7 +214,7 @@
               <span><span id="breakdownEmployerNIPassedPercent">0</span>% | £<span id="breakdownEmployerNIPassed">0</span></span>
             </div>
             <div class="breakdown-item">
-              <span>Employer NI:</span>
+              <span>Employee NI:</span>
               <span>£<span id="breakdownEmployerNI">0</span></span>
             </div>
             <div class="breakdown-item">
@@ -253,7 +253,9 @@
     
   </div>
   
-  <!-- Include jsPDF from CDN -->
+  <!-- Include html2canvas from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Include jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="script.js"></script>
 </body>
