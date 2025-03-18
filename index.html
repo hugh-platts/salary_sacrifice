@@ -10,6 +10,12 @@
   <div class="container">
     <h1>Salary Sacrifice Calculator</h1>
     
+    <!-- New: Customer Name Input -->
+    <div class="input-group">
+      <label for="customerName">Customer Name:</label>
+      <input type="text" id="customerName" placeholder="Enter customer name" />
+    </div>
+    
     <div class="input-section">
       <div class="input-group">
         <label for="grossSalary">Gross Salary (£) [Annual]:</label>
@@ -21,18 +27,22 @@
         <input type="number" id="vehicleCost" step="10" />
       </div>
       
+      <!-- Updated: P11D Value (formerly Vehicle Value) -->
+      <div class="input-group">
+        <label for="vehicleValue">P11D Value (£):</label>
+        <input type="number" id="vehicleValue" step="100" />
+      </div>
+      
       <div class="input-group">
         <label for="employerNIC">Employer NIC (%):</label>
         <input type="number" id="employerNIC" step="0.1" value="13.8" />
       </div>
       
-      <!-- New: Employee NIC -->
       <div class="input-group">
         <label for="employeeNIC">Employee NIC (%):</label>
         <input type="number" id="employeeNIC" step="0.1" value="2" />
       </div>
       
-      <!-- New: BIK Rate -->
       <div class="input-group">
         <label for="bikRate">BIK Rate (%):</label>
         <input type="number" id="bikRate" step="0.1" value="2" />
@@ -68,10 +78,10 @@
       </div>
       
       <div class="input-group">
-        <label>Employer Keeps NI Saving?</label>
+        <label>Employer Keeps NI Savings?</label>
         <div class="btn-group" id="niGroup">
-          <button class="btn active">Yes</button>
-          <button class="btn">No</button>
+          <button class="btn">Yes</button>
+          <button class="btn active">No</button>
           <button class="btn">Percent</button>
         </div>
         <input type="number" id="niPercent" class="hidden" placeholder="NI Percentage" step="1" />
@@ -121,6 +131,8 @@
     </div>
     
     <button onclick="calculate()" class="calculate-btn">Calculate</button>
+    <!-- New: Save as PDF button -->
+    <button onclick="savePDF()" class="save-btn">Save as PDF</button>
     
     <div class="results-section">
       <h2>Results</h2>
@@ -241,6 +253,8 @@
     
   </div>
   
+  <!-- Include jsPDF from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
