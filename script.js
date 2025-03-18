@@ -223,21 +223,158 @@ function calculate() {
   }
 }
 
-// --- Save as PDF Function ---
 function savePDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+  // Get customer name and use it for the filename.
+  const customerName = document.getElementById('customerName').value.trim();
+  const fileName = customerName ? `${customerName}_quote.pdf` : 'quote.pdf';
   
-  // For this example, we’ll print the main container
-  // Adjust as needed to format the PDF quote
-  doc.html(document.querySelector('.container'), {
-    callback: function (doc) {
-      doc.save('quote.pdf');
-    },
-    x: 10,
-    y: 10
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p', 'pt', 'a4');
+  const marginLeft = 40;
+  let currentY = 40;
+
+  // HEADER SECTION
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  doc.text("Salary Sacrifice Quote", marginLeft, currentY);
+  currentY += 30;
+  
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(12);
+  doc.text(`Customer: ${customerName || "N/A"}`, marginLeft, currentY);
+  currentY += 20;
+  doc.text(`Date: ${new Date().toLocaleDateString()}`, marginLeft, currentY);
+  currentY += 30;
+  
+  // Utility function: add a row if data is available.
+  const addRow = (label, value, arr) => {
+    if (value && value.trim() !== "") {
+      arr.push([label, value.trim()]);
+    }
+  };
+
+  // SECTION 1: General & Deal Information (in prioritized order)
+  // Note: Adjust the IDs below to match your actual elements.
+  const detailsData = [];
+  addRow("Salary Sacrifice", 
+         document.getElementById('salarySacrifice') ? document.getElementById('salarySacrifice').textContent : "", 
+         detailsData);
+  addRow("Salary Sacrifice Deal", 
+         document.getElementById('salarySacrificeDeal') ? document.getElementById('salarySacrificeDeal').textContent : "", 
+         detailsData);
+  addRow("Salary", 
+         document.getElementById('salary') ? document.getElementById('salary').value : "", 
+         detailsData);
+  addRow("DOB", 
+         document.getElementById('dob') ? document.getElementById('dob').value : "", 
+         detailsData);
+  addRow("#Drivers", 
+         document.getElementById('drivers') ? document.getElementById('drivers').value : "", 
+         detailsData);
+  addRow("Postcode", 
+         document.getElementById('postcode') ? document.getElementById('postcode').value : "", 
+         detailsData);
+  // Insurance fields
+  addRow("Insurance Provider", 
+         document.getElementById('insuranceProvider') ? document.getElementById('insuranceProvider').value : "", 
+         detailsData);
+  addRow("Insurance Rate", 
+         document.getElementById('insuranceRate') ? document.getElementById('insuranceRate').value : "", 
+         detailsData);
+  addRow("Insurance Reference", 
+         document.getElementById('insuranceReference') ? document.getElementById('insuranceReference').value : "", 
+         detailsData);
+  addRow("Insurance Policy Issued", 
+         document.getElementById('insurancePolicyIssued') ? document.getElementById('insurancePolicyIssued').value : "", 
+         detailsData);
+  // Early Termination value (skip header)
+  addRow("Early Termination", 
+         document.getElementById('earlyTermination') ? document.getElementById('earlyTermination').value : "", 
+         detailsData);
+  // Home Charger: include only Charger Cost
+  addRow("Charger Cost", 
+         document.getElementById('chargerCost') ? document.getElementById('chargerCost').value : "", 
+         detailsData);
+  // NR VAT (as a field, e.g. "10%")
+  addRow("NR VAT", 
+         document.getElementById('nrVAT') ? document.getElementById('nrVAT').value : "", 
+         detailsData);
+  
+
+  
+  const tableX = marginLeft;
+  const col1Width = 200;
+  const col2Width = 150;
+  const rowHeight = 20;
+  
+  
+  doc.setFont("helvetica", "normal");
+  detailsData.forEach((row, i) => {
+    if (i % 2 === 0) {
+      doc.setFillColor(245, 245, 245);
+      doc.rect(tableX, currentY, col1Width + col2Width, rowHeight, 'F');
+    }
+    doc.text(row[0], tableX + 5, currentY + 14);
+    doc.text(row[1], tableX + col1Width + 5, currentY + 14);
+    currentY += rowHeight;
   });
+  
+  currentY += 20;
+  
+  // SECTION 2: Calculation Summary Table (fields as per your prioritized list)
+  doc.setFont("helvetica", "bold");
+  doc.text("Calculation Summary", marginLeft, currentY);
+  currentY += 20;
+  
+  // Build calculation summary data array.
+  const summaryData = [
+    ["Finance Rental Total", document.getElementById('breakdownFRTotal').textContent],
+    ["Finance Rental", document.getElementById('breakdownFinanceRental').textContent],
+    ["Maintenance Rental", document.getElementById('breakdownMaintenanceRental').textContent],
+    ["NR VAT", document.getElementById('breakdownNRVAT').textContent],
+    ["Insurance Rate", document.getElementById('breakdownInsurance').textContent],
+    ["BIK Rate", document.getElementById('breakdownBIKRate').textContent + "%"],
+    ["BIK Tax", document.getElementById('breakdownBIKTax').textContent],
+    ["Tax Rate", document.getElementById('breakdownTaxRate').textContent + "%"],
+    ["NI Rate", document.getElementById('breakdownNIRate').textContent + "%"],
+    ["Employer NI Rate", "13.8%"],
+    ["Employer NI", document.getElementById('breakdownEmployerNI').textContent],
+    ["Employer NI Savings", document.getElementById('breakdownEmployerNISavings').textContent],
+    ["Employer NI Savings Passed (%)", document.getElementById('breakdownEmployerNIPassedPercent').textContent + "%"],
+    ["Employer NI Savings Passed", document.getElementById('breakdownEmployerNIPassed').textContent],
+    ["Employer Gross Rental", document.getElementById('breakdownEGR').textContent],
+    ["Gross Salary Sacrifice", document.getElementById('breakdownGSS').textContent],
+    ["Tax Saving", document.getElementById('breakdownTaxSaving').textContent],
+    ["NI Saving", document.getElementById('breakdownNISaving').textContent],
+    ["Total Saving", document.getElementById('breakdownTotalSaving').textContent],
+    ["Net Salary Sacrifice", document.getElementById('breakdownNetSacrifice').textContent]
+  ];
+  
+  // Draw header row for Calculation Summary table.
+  doc.setFillColor(200, 200, 200);
+  doc.rect(tableX, currentY, col1Width + col2Width, rowHeight, 'F');
+  doc.setTextColor(0, 0, 0);
+  doc.setFont("helvetica", "bold");
+  doc.text("Description", tableX + 5, currentY + 14);
+  doc.text("Monthly (£)", tableX + col1Width + 5, currentY + 14);
+  currentY += rowHeight;
+  
+  doc.setFont("helvetica", "normal");
+  summaryData.forEach((row, i) => {
+    if (i % 2 === 0) {
+      doc.setFillColor(245, 245, 245);
+      doc.rect(tableX, currentY, col1Width + col2Width, rowHeight, 'F');
+    }
+    doc.text(row[0], tableX + 5, currentY + 14);
+    doc.text(row[1], tableX + col1Width + 5, currentY + 14);
+    currentY += rowHeight;
+  });
+  
+  // Finally, save the PDF using the customer name.
+  doc.save(fileName);
 }
+
+
 
 // Run initial calculations
 calculateTaxRate();
