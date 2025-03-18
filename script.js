@@ -85,6 +85,8 @@ function calculate() {
   // Retrieve inputs
   const grossSalaryAnnual = parseFloat(document.getElementById('grossSalary').value) || 0;
   const vehicleCost = parseFloat(document.getElementById('vehicleCost').value) || 0; // Monthly Finance Rental
+  // Here, vehicleValue now represents the P11D value.
+  const vehicleValue = parseFloat(document.getElementById('vehicleValue').value) || 0;
   const employerNICPercent = parseFloat(document.getElementById('employerNIC').value) || 0;
   const employeeNICPercent = (parseFloat(document.getElementById('employeeNIC').value) || 2);
   const bikRatePercent = (parseFloat(document.getElementById('bikRate').value) || 2);
@@ -137,8 +139,8 @@ function calculate() {
   const niSaving = grossSalarySacrifice * (employeeNICPercent / 100);
   
   // --- BIK Tax ---
-  // Monthly BIK Tax = Finance Rental Total * (BIK Rate × 2)
-  const bikTax = financeRentalTotal * ((bikRatePercent / 100) * 2);
+  // New calculation: Monthly BIK Tax = (P11D value * (BIK Rate/100) * taxRateDecimal) / 12
+  const bikTax = (vehicleValue * (bikRatePercent / 100) * taxRateDecimal) / 12;
   
   // --- Total Saving & Net Salary Sacrifice ---
   const totalSaving = taxSaving + niSaving - bikTax;
@@ -219,6 +221,22 @@ function calculate() {
   } else {
     document.getElementById('breakdownEmployerNIPassedRow').classList.add('hidden');
   }
+}
+
+// --- Save as PDF Function ---
+function savePDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  
+  // For this example, we’ll print the main container
+  // Adjust as needed to format the PDF quote
+  doc.html(document.querySelector('.container'), {
+    callback: function (doc) {
+      doc.save('quote.pdf');
+    },
+    x: 10,
+    y: 10
+  });
 }
 
 // Run initial calculations
