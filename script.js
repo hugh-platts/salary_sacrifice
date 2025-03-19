@@ -82,17 +82,16 @@ document.querySelectorAll('.btn-group .btn').forEach(btn => {
 
 // --- Main Calculation ---
 function calculate() {
-  // Retrieve inputs
+  // 1) Gather Inputs
   const grossSalaryAnnual = parseFloat(document.getElementById('grossSalary').value) || 0;
   const vehicleCost = parseFloat(document.getElementById('vehicleCost').value) || 0; // Monthly Finance Rental
-  // Here, vehicleValue now represents the P11D value.
-  const vehicleValue = parseFloat(document.getElementById('vehicleValue').value) || 0;
-  const employerNICPercent = parseFloat(document.getElementById('employerNIC').value) || 0;
-  const employeeNICPercent = (parseFloat(document.getElementById('employeeNIC').value) || 2);
-  const bikRatePercent = (parseFloat(document.getElementById('bikRate').value) || 2);
+  const vehicleValue = parseFloat(document.getElementById('vehicleValue').value) || 0; // P11D value
+  const employerNICPercent = parseFloat(document.getElementById('employerNIC').value) || 0; // e.g. 13.8
+  const employeeNICPercent = parseFloat(document.getElementById('employeeNIC').value) || 2;
+  const bikRatePercent = parseFloat(document.getElementById('bikRate').value) || 2;
   const taxRateDecimal = (parseFloat(document.getElementById('taxRateInput').value) || currentTaxRate) / 100;
   
-  // Optional inputs
+  // Optional
   const maintenanceMonthly = parseFloat(document.getElementById('maintenanceMonthly').value) || 0;
   const insuranceMonthly = parseFloat(document.getElementById('insuranceMonthly').value) || 0;
   
@@ -110,94 +109,105 @@ function calculate() {
     leaseDuration = parseInt(document.getElementById('customDuration').value);
   }
   
-  // --- Benefit Components (Monthly) ---
-  const financeRental = vehicleCost; // Finance Rental
-  const maintenanceRental = maintenanceMonthly; // Maintenance Rental
+  // 2) Basic Monthly Costs
+  const financeRental = vehicleCost; // monthly finance
+  const maintenanceRental = maintenanceMonthly;
   const nrVAT = financeRental * 0.10; // 10% of Finance Rental
-  const financeRentalTotal = financeRental + maintenanceRental + nrVAT; // Finance Rental Total
-  const insuranceRate = insuranceMonthly; // Insurance Rate
-  const employerGrossRental = financeRentalTotal + insuranceRate; // Employer Gross Rental
-  
-  // --- Employer NIC Calculation ---
+  const financeRentalTotal = financeRental + maintenanceRental + nrVAT; 
+  const insuranceRate = insuranceMonthly;
+  const employerGrossRental = financeRentalTotal + insuranceRate; // e.g. ~ 1,614.52
+
+  // 3) Employer NI on the BIK portion
+  // monthly BIK (value) = (vehicleValue * (bikRate / 100)) / 12
+  const monthlyBIKValue = (vehicleValue * (bikRatePercent / 100)) / 12;
+  const employerNIonBIK = monthlyBIKValue * (employerNICPercent / 100);
+
+  // 4) Employer NI Savings Potential
+  // As per your request: (Employer Gross Rental + Employer NI on BIK) * NIC%
+  const employerNISavingsPotential = (employerGrossRental + employerNIonBIK) * (employerNICPercent / 100);
+
+  // 5) Check NI Option (Yes, No, Percent)
   const niOption = document.querySelector('#niGroup .btn.active').textContent.trim();
   let appliedEmployerNISavings = 0;
   if (niOption === "Yes") {
-    appliedEmployerNISavings = employerGrossRental * (employerNICPercent / 100);
+    appliedEmployerNISavings = employerNISavingsPotential;
   } else if (niOption === "Percent") {
     const percentValue = parseFloat(document.getElementById('niPercent').value) || 0;
-    appliedEmployerNISavings = employerGrossRental * (percentValue / 100);
-  } else { // "No"
+    appliedEmployerNISavings = employerNISavingsPotential * (percentValue / 100);
+  } else {
     appliedEmployerNISavings = 0;
   }
-  // --- Employer NI Calculation (Corrected based on BIK amount) ---
-  const bikAmountAnnual = vehicleValue * (bikRatePercent / 100);
-  const employerNI = (bikAmountAnnual * (employerNICPercent / 100)) / 12;
 
-  
-  // --- Gross Salary Sacrifice ---
-  const grossSalarySacrifice = employerGrossRental - appliedEmployerNISavings + employerNI;
-  
-  // --- Tax & NIC Savings ---
+  // 6) Gross Salary Sacrifice
+  // Typically: Employer Gross Rental - (Any NI savings passed)
+  const grossSalarySacrifice = employerGrossRental - appliedEmployerNISavings + employerNIonBIK;
+
+  // 7) Employee's BIK Tax each month
+  // = monthly BIK value * the employee's tax rate
+  const bikTax = monthlyBIKValue * taxRateDecimal;
+
+  // 8) Tax & NIC Savings
   const taxSaving = grossSalarySacrifice * taxRateDecimal;
   const niSaving = grossSalarySacrifice * (employeeNICPercent / 100);
-  
-  // --- BIK Tax ---
-  // New calculation: Monthly BIK Tax = (P11D value * (BIK Rate/100) * taxRateDecimal) / 12
-  const bikTax = (vehicleValue * (bikRatePercent / 100) * taxRateDecimal) / 12;
-  
-  // --- Total Saving & Net Salary Sacrifice ---
+
+  // 9) Overall Savings & Net Sacrifice
   const totalSaving = taxSaving + niSaving - bikTax;
   const netSalarySacrifice = grossSalarySacrifice - totalSaving;
-  
-  // --- Cost Without Salary Sacrifice ---
+
+  // 10) Cost Without Salary Sacrifice
   const costWithoutSacrifice = employerGrossRental;
-  
-  // --- Annual Equivalents ---
+
+  // 11) Annual Equivalents
   const multiplier = 12;
-  
-  // --- Update Main Results ---
+
+  // --- Formatting & Display ---
   const formatter = new Intl.NumberFormat('en-GB', {
     style: 'decimal',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   });
-  
   const updateElement = (id, value) => {
     document.getElementById(id).textContent = formatter.format(value);
   };
-  
+
+  // Main Results
   updateElement('grossSacrificeMonthly', grossSalarySacrifice);
   updateElement('grossSacrificeAnnual', grossSalarySacrifice * multiplier);
-  
+
   updateElement('taxSavingMonthly', taxSaving);
   updateElement('taxSavingAnnual', taxSaving * multiplier);
-  
+
   updateElement('niSavingMonthly', niSaving);
   updateElement('niSavingAnnual', niSaving * multiplier);
-  
+
   updateElement('bikTaxMonthly', bikTax);
   updateElement('bikTaxAnnual', bikTax * multiplier);
-  
+
   updateElement('totalSavingMonthly', totalSaving);
   updateElement('totalSavingAnnual', totalSaving * multiplier);
-  
+
   updateElement('netSacrificeMonthly', netSalarySacrifice);
   updateElement('netSacrificeAnnual', netSalarySacrifice * multiplier);
-  
+
   updateElement('costWithoutSacrificeMonthly', costWithoutSacrifice);
   updateElement('costWithoutSacrificeAnnual', costWithoutSacrifice * multiplier);
-  
+
   updateElement('feesTotal', feesTotal);
-  
-  // --- Update Breakdown Section ---
+
+  // --- Breakdown Section ---
   updateElement('breakdownFinanceRental', financeRental);
   updateElement('breakdownMaintenanceRental', maintenanceRental);
   updateElement('breakdownNRVAT', nrVAT);
   updateElement('breakdownFRTotal', financeRentalTotal);
   updateElement('breakdownInsurance', insuranceRate);
   updateElement('breakdownEGR', employerGrossRental);
-  updateElement('breakdownEmployerNISavings', appliedEmployerNISavings);
-  updateElement('breakdownEmployerNI', employerNI);
+
+  // Employer NI on BIK
+  updateElement('breakdownEmployerNI', employerNIonBIK);
+
+  // Employer NI Savings = (Employer Gross Rental + Employer NI on BIK) * NIC%
+  updateElement('breakdownEmployerNISavings', employerNISavingsPotential);
+
   updateElement('breakdownGSS', grossSalarySacrifice);
   updateElement('breakdownTaxSaving', taxSaving);
   updateElement('breakdownNISaving', niSaving);
@@ -205,13 +215,13 @@ function calculate() {
   updateElement('breakdownTotalSaving', totalSaving);
   updateElement('breakdownNetSacrifice', netSalarySacrifice);
   updateElement('breakdownCostWithout', costWithoutSacrifice);
-  
-  // Update rates in breakdown display
+
+  // Display rates
   updateElement('breakdownTaxRate', taxRateDecimal * 100);
   updateElement('breakdownNIRate', employeeNICPercent);
   updateElement('breakdownBIKRate', bikRatePercent);
-  
-  // --- Update Employer NI Savings Passed Breakdown (Conditional) ---
+
+  // Employer NI Savings Passed
   if (niOption === "Yes") {
     updateElement('breakdownEmployerNIPassedPercent', 100);
     updateElement('breakdownEmployerNIPassed', appliedEmployerNISavings);
@@ -226,6 +236,7 @@ function calculate() {
   }
 }
 
+// --- Save as PDF Function ---
 function savePDF() {
   // Get customer name and use it for the filename.
   const customerName = document.getElementById('customerName').value.trim();
@@ -303,13 +314,10 @@ function savePDF() {
          document.getElementById('nrVAT') ? document.getElementById('nrVAT').value : "", 
          detailsData);
   
-
-  
   const tableX = marginLeft;
   const col1Width = 200;
   const col2Width = 150;
   const rowHeight = 20;
-  
   
   doc.setFont("helvetica", "normal");
   detailsData.forEach((row, i) => {
@@ -324,12 +332,12 @@ function savePDF() {
   
   currentY += 20;
   
-  // SECTION 2: Calculation Summary Table (fields as per your prioritized list)
+  // EXAMPLE: Calculation Summary Table
   doc.setFont("helvetica", "bold");
   doc.text("Calculation Summary", marginLeft, currentY);
   currentY += 20;
   
-  // Build calculation summary data array.
+  // Build calculation summary data array. Adjust as needed.
   const summaryData = [
     ["Finance Rental Total", document.getElementById('breakdownFRTotal').textContent],
     ["Finance Rental", document.getElementById('breakdownFinanceRental').textContent],
@@ -340,7 +348,7 @@ function savePDF() {
     ["BIK Tax", document.getElementById('breakdownBIKTax').textContent],
     ["Tax Rate", document.getElementById('breakdownTaxRate').textContent + "%"],
     ["NI Rate", document.getElementById('breakdownNIRate').textContent + "%"],
-    ["Employer NI Rate", "13.8%"],
+    ["Employer NI Rate", document.getElementById('employerNIC').value + "%"],
     ["Employer NI", document.getElementById('breakdownEmployerNI').textContent],
     ["Employer NI Savings", document.getElementById('breakdownEmployerNISavings').textContent],
     ["Employer NI Savings Passed (%)", document.getElementById('breakdownEmployerNIPassedPercent').textContent + "%"],
@@ -376,8 +384,6 @@ function savePDF() {
   // Finally, save the PDF using the customer name.
   doc.save(fileName);
 }
-
-
 
 // Run initial calculations
 calculateTaxRate();
