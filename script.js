@@ -129,7 +129,10 @@ function calculate() {
   } else { // "No"
     appliedEmployerNISavings = 0;
   }
-  const employerNI = employerGrossRental * 0.01123; // Employer NI cost
+  // --- Employer NI Calculation (Corrected based on BIK amount) ---
+  const bikAmountAnnual = vehicleValue * (bikRatePercent / 100);
+  const employerNI = (bikAmountAnnual * (employerNICPercent / 100)) / 12;
+
   
   // --- Gross Salary Sacrifice ---
   const grossSalarySacrifice = employerGrossRental - appliedEmployerNISavings + employerNI;
